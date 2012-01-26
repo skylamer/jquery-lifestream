@@ -28,8 +28,13 @@ Currently supports the following feeds:
 * [Formspring](http://formspring.com)
 * [Forrst](http://forrst.com)
 * [Foursquare](http://foursquare.com)
+* [Gimmebar](http://gimmebar.com)
 * [Github](http://github.com)
+<<<<<<< HEAD
 * [Google+](http://plus.google.com/)
+=======
+* [Google+](http://plus.google.com)
+>>>>>>> upstream/master
 * [Google Reader](http://google.com/reader)
 * [Instapaper](http://www.instapaper.com)
 * [Iusethis](http://osx.iusethis.com/)
@@ -40,6 +45,7 @@ Currently supports the following feeds:
 * [Pinboard](http://pinboard.com)
 * [Posterous](http://posterous.com)
 * [Reddit](http://reddit.com)
+* [RSS](http://en.wikipedia.org/wiki/RSS)
 * [Slideshare](http://slideshare.com)
 * [Snipplr](http://snipplr.com)
 * [Stackoverflow](http://stackoverflow.com)
@@ -49,6 +55,7 @@ Currently supports the following feeds:
 * [Wikipedia](http://wikipedia.com)
 * [Wordpress](http://wordpress.com)
 * [Youtube](http://youtube.com)
+* [Zotero](http://zotero.com)
 
 Feel free to fork the project and add your own feeds in.  
 Just send a pull request to [christianv/jquery-lifestream][jquery-lifestream] when you're finished.
@@ -56,7 +63,7 @@ Just send a pull request to [christianv/jquery-lifestream][jquery-lifestream] wh
 ## Extensions
 
 * [Filter feeds](https://gist.github.com/1170205) - used by [codeandstuff.com](http://www.codeandstuff.com/)
-* [Drupal module](https://github.com/dineshcooper/Social-River) - jQuery lifestream as a drupal module called Social River.
+* [Drupal module](http://drupal.org/project/social_river) - jQuery lifestream as a drupal module called Social River.
 
 ## Build
 
@@ -203,26 +210,33 @@ Stuff that isn"t implemented yet, but would be nice to have:
 
 Places on the web where this plug-in got mentioned:
 
+* [Andref.it](http://andref.it/blog/2011/aggrega-la-tua-attivita-online-con-jquery-lifestream/) - Italian
 * [BlogUpstairs](http://blogupstairs.com/framework/javascript-framework/jquery/jquery-lifestream-show-a-stream-of-your-online-activity-with-jquery/)
 * [Codevisually](http://codevisually.com/jquery-lifestream-create-a-stream-of-your-online-activity/)
 * [DailyJS](http://dailyjs.com/2011/06/21/jquery-roundup/)
 * [DesignBeep](http://designbeep.com/2011/06/02/17-fresh-and-functional-jquery-plugins-you-will-love/)
 * [Devl.im](http://devl.im/jquery-lifestream-show-a-stream-of-your-online-activity/)
+* [Doejo](http://doejo.com/blog/jquery-lifestream-a-simple-way-to-track-your-online-activity-in-one-spot)
 * [Eire Media](http://repo.eire-media.com/go/)
 * [Elliptips](http://elliptips.info/2011/09/lifestream-votre-vie-virtuelle-sous-forme-de-timeline-en-jquery/) - French
 * [Erik Ostrom Blog](http://slapdash.erikostrom.com/post/9797738423/just-finally-added-something-to-my-ostensible-web)
 * [doejo](http://doejo.com/blog/jquery-lifestream-a-simple-way-to-track-your-online-activity-in-one-spot)
 * [HTML.it](http://javascript.html.it/script/vedi/6468/le-nostre-attivita-su-internet-con-il-plugin-jquery-lifestream/) - Italian
+* [Hypem](http://hypem.com/)
 * [jQuery Rain](http://www.jqueryrain.com/2011/06/jquery-lifestream/)
 * [jqueryitalia](http://twitter.com/jqueryitalia/status/77999618046169088)
 * [Lifestream Blog](http://lifestreamblog.com/create-a-dynamic-activity-stream-with-the-jquery-lifestream-script/)
 * [Simong Gaeremynck Blog](http://blog.gaeremynck.com/jquery-lifestream-and-followmy-tv/)
 * [Softpedia](http://webscripts.softpedia.com/script/Modules/jQuery-Plugins/jQuery-Lifestream-68762.html) - Softpedia pick
+* [Speckyboy](http://speckyboy.com/2011/12/07/the-50-most-useful-jquery-plugins-from-2011/)
+* [Spyrestudios](http://spyrestudios.com/31-fantastic-new-jquery-plugins-for-web-developers/)
 * [phpspot](http://phpspot.org/blog/archives/2011/06/jquerylifestrea.html) - Japanese
 * [ProgrammableWeb](http://www.programmableweb.com/mashup/jquery-lifestream) - Mashup of the Day on 17/06/2011
 * [Smashing Magazine](http://twitter.com/smashingmag/status/77993263981797376)
+* [Tactoom.com](http://tactoom.com/interest/Hardcore/4ed34793de3b117715002952)
 * [The Changelog](http://thechangelog.com/post/7262848148/jquery-lifestream-show-a-stream-of-your-online-activity)
 * [The Next Web](http://thenextweb.com/dd/2011/07/08/jquery-lifestream-makes-it-easy-to-pop-your-online-activity-onto-any-page/)
+* [Weboptimize](http://www.aranda.se/2011/12/17/10-interesting-jquery-plugins/)
 
 ## Used By
 
@@ -230,7 +244,10 @@ A list of sites that use the jQuery Lifestream plug-in:
 
 [Alex Buznik (Russian)](http://buznik.net/j/my-social-media), 
 [Armin Roșu](http://armin.ro/), 
+[Bender Rodriges](http://bbrodriges.github.com/blog/), 
+[Blake Embrey](http://blakeembrey.me/#lifestream), 
 [BrainDump2.0](http://mgiulio.altervista.org/), 
+[Dennis Metzcher](http://lifestream.metzcher.com/), 
 [Erik Ostrom](http://www.erikostrom.com/), 
 [Robbie.io](http://robbie.io/life.html), 
 [Sam Tardif](http://www.codeandstuff.com/), 
@@ -244,6 +261,11 @@ Special thanks all the [committers](https://raw.github.com/christianv/jquery-lif
 
 ## Version log
 
+* 0.3.0 RSS support
+* 0.2.9 Hypem support
+* 0.2.8 Gimmebar support
+* 0.2.7 Zotero support
+* 0.2.6 Google+ support
 * 0.2.5 Wikipedia support
 * 0.2.4 LibraryThing support
 * 0.2.3 Digg support

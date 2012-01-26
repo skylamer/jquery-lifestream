@@ -16,7 +16,11 @@ $.fn.lifestream.feeds.googleplus = function( config, callback ) {
       for( ; i<j; i++) {
         item = input.items[i];
         output.push({
+<<<<<<< HEAD
           date: new Date(item.published),
+=======
+          date: new Date( item.published ),
+>>>>>>> upstream/master
           config: config,
           html: $.tmpl( template.posted, item )
         });
@@ -28,10 +32,17 @@ $.fn.lifestream.feeds.googleplus = function( config, callback ) {
 
   $.ajax({
     url: "https://www.googleapis.com/plus/v1/people/" + config.user +
+<<<<<<< HEAD
 	"/activities/public",
 	data:{
 	key: config.key
 	},
+=======
+	    "/activities/public",
+	  data: {
+	    key: config.key
+	  },
+>>>>>>> upstream/master
     dataType: 'jsonp',
     success: function( data ) {
 	   if (data.error) {
@@ -40,8 +51,14 @@ $.fn.lifestream.feeds.googleplus = function( config, callback ) {
           console.error('Error loading Google+ stream.', data.error);
         }
         return;
+<<<<<<< HEAD
       }
       callback(parseGooglePlus(data));
+=======
+      } else {
+        callback(parseGooglePlus(data));
+      }
+>>>>>>> upstream/master
     }
   });
 
@@ -52,4 +69,8 @@ $.fn.lifestream.feeds.googleplus = function( config, callback ) {
   };
 
 };
+<<<<<<< HEAD
 })(jQuery);
+=======
+})(jQuery);
+>>>>>>> upstream/master

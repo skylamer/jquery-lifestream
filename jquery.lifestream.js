@@ -1,12 +1,14 @@
 /*!
  * jQuery Lifestream Plug-in
- * @version 0.2.5
+ * @version 0.3.0
  * Show a stream of your online activity
  *
  * Copyright 2011, Christian Vuerings - http://denbuzze.com
  */
 /*globals jQuery, $ */
 ;(function( $ ){
+
+  "use strict";
 
   /**
    * Initialize the lifestream plug-in
@@ -83,8 +85,8 @@
         for ( ; i < length; i++ ) {
           item = items[i];
           if ( item.html ) {
-            $('<li class="'+ settings.classname + '-'
-              + item.config.service + '">').data( "name", item.config.service )
+            $('<li class="'+ settings.classname + '-' +
+               item.config.service + '">').data( "name", item.config.service )
                                            .data( "url", item.url || "#" )
                                            .data( "time", item.date )
                                            .append( item.html )
@@ -123,8 +125,8 @@
           // Check whether the feed exists, if the feed is a function and if a
           // user has been filled in
           if ( $.fn.lifestream.feeds[config.service] &&
-               $.isFunction( $.fn.lifestream.feeds[config.service] )
-               && config.user) {
+               $.isFunction( $.fn.lifestream.feeds[config.service] ) &&
+               config.user) {
 
             // You'll be able to get the global settings by using
             // config._settings in your feed
@@ -167,6 +169,25 @@
    * A big container which contains all available feeds
    */
   $.fn.lifestream.feeds = $.fn.lifestream.feeds || {};
+
+  /**
+   * Add compatible Object.keys support in older environments that do not natively support it
+   * https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys#section_6
+   */
+  if(!Object.keys) {
+    Object.keys = function(o){
+      if (o !== Object(o)){
+        throw new TypeError('Object.keys called on non-object');
+      }
+      var ret=[],p;
+      for(p in o) {
+        if(Object.prototype.hasOwnProperty.call(o,p)) {
+          ret.push(p);
+        }
+      }
+      return ret;
+    };
+  }
 
 }( jQuery ));
 (function($) {
@@ -828,6 +849,44 @@ $.fn.lifestream.feeds.foursquare = function( config, callback ) {
 
 };
 })(jQuery);(function($) {
+$.fn.lifestream.feeds.gimmebar = function( config, callback ) {
+
+  var template = $.extend({},
+    {
+      bookmarked: 'bookmarked <a href="${short_url}">${title}</a>'
+    },
+    config.template);
+
+  $.ajax({
+    url: "https://gimmebar.com/api/v0/public/assets/" + config.user + ".js?jsonp_callback=?",
+    dataType: "json",
+    success: function( data ) {
+      data = data.records;
+      var output = [], i = 0, j;
+      if (data && data.length && data.length > 0) {
+        j = data.length;
+        for( ; i < j; i++) {
+          var item = data[i];
+          output.push({
+            date: new Date(item.date * 1000),
+            config: config,
+            html: $.tmpl( template.bookmarked, item )
+          });
+        }
+      }
+      callback(output);
+    }
+  });
+
+  // Expose the template.
+  // We use this to check which templates are available
+  return {
+    "template" : template
+  };
+
+};
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.github = function( config, callback ) {
 
   var template = $.extend({},
@@ -978,6 +1037,62 @@ $.fn.lifestream.feeds.github = function( config, callback ) {
 };
 })(jQuery);
 (function($) {
+$.fn.lifestream.feeds.googleplus = function( config, callback ) {
+
+  var template = $.extend({},
+    {
+    posted: '<a href="${actor.url}">${actor.displayName}</a> has posted a new entry <a href="${url}" '
+        + 'title="${id}">${title}</a> <!--With--> ${object.replies.totalItems} replies, ${object.plusoners.totalItems} +1s, ${object.resharers.totalItems} Reshares'
+    },
+    config.template),
+
+  parseGooglePlus = function( input ) {
+    var output = [], i = 0, j, item;
+
+    if(input && input.items) {
+      j = input.items.length;
+      for( ; i<j; i++) {
+        item = input.items[i];
+        output.push({
+          date: new Date( item.published ),
+          config: config,
+          html: $.tmpl( template.posted, item )
+        });
+      }
+    }
+
+    return output;
+  };
+
+  $.ajax({
+    url: "https://www.googleapis.com/plus/v1/people/" + config.user +
+	    "/activities/public",
+	  data: {
+	    key: config.key
+	  },
+    dataType: 'jsonp',
+    success: function( data ) {
+	   if (data.error) {
+        callback([]);
+        if (console && console.error) {
+          console.error('Error loading Google+ stream.', data.error);
+        }
+        return;
+      } else {
+        callback(parseGooglePlus(data));
+      }
+    }
+  });
+
+  // Expose the template.
+  // We use this to check which templates are available
+  return {
+    "template" : template
+  };
+
+};
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.googlereader = function( config, callback ) {
 
   var template = $.extend({},
@@ -1028,6 +1143,49 @@ $.fn.lifestream.feeds.googlereader = function( config, callback ) {
 };
 })(jQuery);
 (function($) {
+$.fn.lifestream.feeds.hypem = function( config, callback ) {
+
+  if( !config.type || config.type !== "history" || config.type !== "loved" ) { config.type = "loved"; }
+
+  var template = $.extend({},
+  {
+    loved: 'loved <a href="http://hypem.com/item/${mediaid}">${title}</a> by <a href="http://hypem.com/artist/${artist}">${artist}</a>',
+    history: 'listened to <a href="http://hypem.com/item/${mediaid}">${title}</a> by <a href="http://hypem.com/artist/${artist}">${artist}</a>'
+  },
+  config.template);
+
+  $.ajax({
+    url: "http://hypem.com/playlist/" + config.type + "/" + config.user + "/json/1/data.js",
+    dataType: "json",
+    success: function( data ) {
+      var output = [], i = 0, j = -1;
+      for (var k in data) {
+        if (data.hasOwnProperty(k)) {
+          j++;
+        }
+      }
+      if (data && j > 0) {
+        for( ; i < j; i++) {
+          var item = data[i];
+          output.push({
+            date: new Date( (config.type === "history" ? item.dateplayed : item.dateloved) * 1000 ),
+            config: config,
+            html: $.tmpl( (config.type === "history" ? template.history : template.loved) , item )
+          });
+        }
+      }
+      callback(output);
+    }
+  });
+
+  // Expose the template.
+  // We use this to check which templates are available
+  return {
+    "template" : template
+  };
+
+};
+})(jQuery);(function($) {
 $.fn.lifestream.feeds.instapaper = function( config, callback ) {
 
   var template = $.extend({},
@@ -1506,6 +1664,54 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
 };
 })(jQuery);
 (function($) {
+$.fn.lifestream.feeds.rss = function( config, callback ) {
+
+  var template = $.extend({},
+    {
+      posted: 'posted <a href="${link}">${title}</a>'
+    },
+    config.template),
+
+  /**
+   * Parse the input from rss feed
+   */
+  parseReader = function( input ) {
+    var output = [], list, i = 0, j;
+    if(input.query && input.query.count && input.query.count > 0) {
+      list = input.query.results.rss.channel.item;
+      j = list.length;
+      for( ; i<j; i++) {
+        var item = list[i];
+
+        output.push({
+          url: 'http://www.google.com/reader/shared' + config.user,
+          date: new Date( item.pubDate ),
+          config: config,
+          html: $.tmpl( template.posted, item )
+        });
+      }
+    }
+    return output;
+  };
+
+  $.ajax({
+    url: $.fn.lifestream.createYqlUrl('select * from xml where url="'
+      + config.user + '"'),
+    dataType: 'jsonp',
+    success: function( data ) {
+      callback(parseReader(data));
+    }
+  });
+
+  // Expose the template.
+  // We use this to check which templates are available
+  return {
+    "template" : template
+  };
+
+};
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.slideshare = function( config, callback ) {
 
   var template = $.extend({},
@@ -1864,7 +2070,8 @@ $.fn.lifestream.feeds.twitter = function( config, callback ) {
           date: new Date(status.created_at),
           config: config,
           html: $.tmpl( template.posted, {
-            tweet: linkify(status.text)
+            tweet: linkify(status.text),
+            complete_url: 'http://twitter.com/#!/' + config.user + "/status/" + status.id_str
           } ),
           url: 'http://twitter.com/#!/' + config.user
         });
@@ -1965,8 +2172,8 @@ $.fn.lifestream.feeds.wikipedia = function( config, callback ) {
         for( ; i<j; i++) {
 
           var item = data.query.usercontribs[i];
-          
-          // Fastest way to get the URL. 
+
+          // Fastest way to get the URL.
           // Alternatively, we'd have to poll wikipedia for the pageid's link
           item.url = 'http://' + language + '.wikipedia.org/wiki/'
           + item.title.replace(' ', '_');
@@ -2020,19 +2227,23 @@ $.fn.lifestream.feeds.wordpress = function( config, callback ) {
     return output;
   };
 
-  // If the config.user property starts with http:// we assume that is the
-  // full url to the user his blog. We append the /feed to the url.
-  var url = (config.user.indexOf('http://') === 0
-             ? config.user + '/feed'
-             : 'http://' + config.user + '.wordpress.com/feed');
-  $.ajax({
-    url: $.fn.lifestream.createYqlUrl('select * from xml where '
-      + 'url="' + url + '"'),
-    dataType: "jsonp",
-    success: function ( data ) {
-      callback(parseWordpress(data));
-    }
-  });
+  var url = "";
+
+  if ( config.user ){
+    // If the config.user property starts with http:// we assume that is the
+    // full url to the user his blog. We append the /feed to the url.
+    url = (config.user.indexOf('http://') === 0
+               ? config.user + '/feed'
+               : 'http://' + config.user + '.wordpress.com/feed');
+    $.ajax({
+      url: $.fn.lifestream.createYqlUrl('select * from xml where '
+        + 'url="' + url + '"'),
+      dataType: "jsonp",
+      success: function ( data ) {
+        callback(parseWordpress(data));
+      }
+    });
+  }
 
   // Expose the template.
   // We use this to check which templates are available
@@ -2086,49 +2297,40 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
 
 };
 })(jQuery);(function($) {
-$.fn.lifestream.feeds.googleplus = function( config, callback ) {
+$.fn.lifestream.feeds.zotero = function( config, callback ) {
 
   var template = $.extend({},
     {
-    posted: '<a href="${actor.url}">${actor.displayName}</a> has posted a new entry <a href="${url}" '
-        + 'title="${id}">${title}</a> <!--With--> ${object.replies.totalItems} replies, ${object.plusoners.totalItems} +1s, ${object.resharers.totalItems} Reshares'
+      flagged: 'flagged <a href="${id}">${title}</a> by ${creatorSummary}'
     },
     config.template),
 
-  parseGooglePlus = function( input ) {
-    var output = [], i = 0, j, item;
+  parseZotero = function( input ) {
+    var output = [], list, i = 0, j;
 
-    if(input && input.items) {
-      j = input.items.length;
+    if(input.query && input.query.count && input.query.count > 0) {
+      list = input.query.results.feed.entry;
+      j = list.length;
       for( ; i<j; i++) {
-        item = input.items[i];
+        var item = list[i];
         output.push({
-          date: new Date(item.published),
+          date: new Date(item.updated),
           config: config,
-          html: $.tmpl( template.posted, item )
+          url: 'http://zotero.com/users/' + config.user,
+          html: $.tmpl( template.flagged, item ),
         });
       }
     }
-
     return output;
   };
 
   $.ajax({
-    url: "https://www.googleapis.com/plus/v1/people/" + config.user +
-	"/activities/public",
-	data:{
-	key: config.key
-	},
+    url: $.fn.lifestream.createYqlUrl('select * from xml where url='
+      + '"https://api.zotero.org/users/'
+      + config.user + '/items"'),
     dataType: 'jsonp',
     success: function( data ) {
-	   if (data.error) {
-        callback([]);
-        if (console && console.error) {
-          console.error('Error loading Google+ stream.', data.error);
-        }
-        return;
-      }
-      callback(parseGooglePlus(data));
+      callback(parseZotero(data));
     }
   });
 
